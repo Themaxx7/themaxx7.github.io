@@ -1,9 +1,1470 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><meta charset="UTF-8"><title>Pruebas FAT</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <title>Ficha FAT – Transformador de poder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-main: linear-gradient(135deg, #e4f1ff 0%, #fbefff 50%, #fdfdfd 100%);
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --accent-blue: #2563eb;
+      --accent-cyan: #0891b2;
+      --accent-green: #16a34a;
+      --accent-red: #dc2626;
+      --accent-yellow: #f59e0b;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-soft: #e2e8f0;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12);
+      --radius-xl: 18px;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* HEADER */
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 18px;
+      background: radial-gradient(circle at top left, #eff6ff, #e0f2fe);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      position: sticky;
+      top: 10px;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .badge-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 30% 20%, #e0f2fe, #1d4ed8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e0f2fe;
+      font-weight: 800;
+      font-size: 22px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.55);
+    }
+
+    .header-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-sub strong {
+      color: #020617;
+    }
+
+    .header-flow {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #0f172a;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: baseline;
+    }
+
+    .header-flow-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .header-flow-steps {
+      font-weight: 600;
+      color: #1d4ed8;
+    }
+
+    .author-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .author-chip-label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .author-name {
+      font-weight: 800;
+      color: #1e3a8a;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(191, 219, 254, 0.6);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+    }
+
+    .author-role {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px dashed rgba(59, 130, 246, 0.35);
+      background: rgba(239, 246, 255, 0.9);
+      color: #0f172a;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid transparent;
+      background: transparent;
+      font-size: 13px;
+      cursor: pointer;
+      color: #475569;
+      transition: all 0.15s ease-in-out;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+      min-width: 85px;
+    }
+
+    .nav-step {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    .nav-label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .nav-btn.active {
+      background: white;
+      border-color: rgba(37, 99, 235, 0.6);
+      color: #1d4ed8;
+      box-shadow: 0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+
+    .nav-btn.active .nav-step {
+      color: #1e40af;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+      color: #1d4ed8;
+    }
+
+    /* MAIN LAYOUT */
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 20px 22px 22px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-soft);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title span.icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: white;
+    }
+
+    .icon-blue {
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+    }
+
+    .icon-green {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+    }
+
+    .icon-purple {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+    }
+
+    .card-help {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .fat-section {
+      transition: opacity 0.18s ease-in-out, transform 0.18s ease-in-out;
+    }
+
+    .section-hidden {
+      display: none;
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    /* GRID DATOS GENERALES */
+
+    .grid-datos {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+
+    .field label {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .field small {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .field input[type="text"],
+    .field input[type="date"],
+    .field input[type="number"],
+    .field select,
+    .field textarea {
+      border-radius: 12px;
+      border: 1px solid #cbd5f5;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      background: #f9fbff;
+      transition: all 0.12s ease-in-out;
+      width: 100%;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18);
+      background: #ffffff;
+    }
+
+    /* TABLA PRUEBAS */
+
+    .tabla-pruebas {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    .tabla-pruebas thead {
+      background: linear-gradient(90deg, #eff6ff, #e0f2fe);
+    }
+
+    .tabla-pruebas th,
+    .tabla-pruebas td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    .tabla-pruebas th {
+      text-align: left;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .pill-norma {
+      display: inline-flex;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(37, 99, 235, 0.08);
+      color: #1d4ed8;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    .resultado-select {
+      width: 120px;
+    }
+
+    .comentario-input {
+      width: 100%;
+    }
+
+    .resultado-select select {
+      width: 100%;
+    }
+
+    .footer-resumen {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-accion {
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(135deg, #2563eb, #22c55e);
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-accion span {
+      font-size: 16px;
+    }
+
+    .btn-accion:hover {
+      opacity: 0.94;
+    }
+
+    .obs-textarea {
+      width: 100%;
+      min-height: 70px;
+      border-radius: 12px;
+      border: 1px dashed #cbd5f5;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #f8fafc;
+      resize: vertical;
+    }
+
+    /* PREVISUALIZACIÓN ADJUNTOS */
+
+    .preview-adjuntos {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .preview-item {
+      width: 150px;
+      border-radius: 12px;
+      border: 1px dashed #cbd5f5;
+      background: #f1f5f9;
+      padding: 6px 8px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .preview-item img {
+      width: 100%;
+      max-height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .preview-name {
+      word-break: break-all;
+    }
+
+    .preview-tag {
+      align-self: flex-start;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    /* Combo de comentarios tipo en Observaciones */
+
+    .combo-obs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .combo-obs-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .combo-obs select {
+      min-width: 240px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #cbd5f5;
+      background: #f9fbff;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .combo-obs small {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 960px) {
+      .grid-datos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-tabs {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .grid-datos {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .tabla-pruebas th:nth-child(2),
+      .tabla-pruebas td:nth-child(2) {
+        display: none; /* norma se oculta en pantallas chicas */
+      }
+
+      .card-help {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
 <body>
-<h1>Pruebas FAT</h1>
-<p>Contenido en construcción.</p>
-<a href="../../index.html">← Volver a inicio</a>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="badge-logo">Tr</div>
+      <div class="header-main">
+        <div class="header-title">Ficha FAT – Transformador de poder</div>
+        <div class="header-sub">
+          Mini app educativa local · Ensayos de recepción en fábrica (FAT) para transformadores
+          de potencia.
+        </div>
+        <div class="header-flow">
+          <span class="header-flow-label">Flujo recomendado</span>
+          <span class="header-flow-steps">
+            1. Datos FAT → 2. Pruebas → 3. Observaciones e informe
+          </span>
+        </div>
+        <div class="author-line">
+          <span class="author-chip-label">Autor</span>
+          <span class="author-name">Alejandro Elgueta Zarhi</span>
+          <span class="author-role">
+            Ingeniero en Electricidad e Ingeniero Civil Industrial
+          </span>
+        </div>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-btn active" type="button" data-target="sec-datos">
+          <span class="nav-step">Paso 1</span>
+          <span class="nav-label">Datos FAT</span>
+        </button>
+        <button class="nav-btn" type="button" data-target="sec-pruebas">
+          <span class="nav-step">Paso 2</span>
+          <span class="nav-label">Pruebas</span>
+        </button>
+        <button class="nav-btn" type="button" data-target="sec-obs">
+          <span class="nav-step">Paso 3</span>
+          <span class="nav-label">Observaciones</span>
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- SECCIÓN DATOS GENERALES -->
+      <section class="card fat-section" id="sec-datos">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon icon-blue">1</span>
+            Datos generales del equipo
+          </div>
+          <div class="card-help">
+            Paso 1 de 3: completa primero estos campos básicos del equipo.
+          </div>
+        </div>
+
+        <div class="grid-datos">
+          <!-- PROYECTO / FAENA -->
+          <div class="field">
+            <label for="proyecto">Proyecto / Faena</label>
+            <input
+              id="proyecto"
+              name="proyecto"
+              type="text"
+              list="proyecto-list"
+              placeholder="Ej: Minera Antucoya – OC-208"
+            />
+            <datalist id="proyecto-list">
+              <option value="Minera Antucoya – OC-208"></option>
+              <option value="Minera Antucoya – OC-209"></option>
+              <option value="IEM 7 – Mejillones (Red Dragon)"></option>
+              <option value="Proyecto Kimal – Lo Aguirre"></option>
+            </datalist>
+          </div>
+
+          <!-- OT / CONTRATO -->
+          <div class="field">
+            <label for="ot">OT / Contrato</label>
+            <input
+              id="ot"
+              name="ot"
+              type="text"
+              list="ot-list"
+              placeholder="Ej: OT 12345"
+            />
+            <datalist id="ot-list">
+              <option value="OT 4476-24"></option>
+              <option value="OT 4477-24"></option>
+              <option value="OC-208 – Sala eléctrica"></option>
+              <option value="OC-209 – Subestación unitaria"></option>
+            </datalist>
+          </div>
+
+          <!-- IDENTIFICACIÓN EQUIPO -->
+          <div class="field">
+            <label for="equipo">Identificación equipo</label>
+            <input
+              id="equipo"
+              name="equipo"
+              type="text"
+              list="equipo-list"
+              placeholder="Ej: TR-01 33/6,6 kV 10 MVA"
+            />
+            <datalist id="equipo-list">
+              <option value="TR-01 33/6,6 kV 10 MVA"></option>
+              <option value="TR-02 33/6,6 kV 10 MVA"></option>
+              <option value="TR-BT-Servicios Auxiliares"></option>
+            </datalist>
+          </div>
+
+          <!-- POTENCIA NOMINAL -->
+          <div class="field">
+            <label for="potencia">Potencia nominal</label>
+            <input
+              id="potencia"
+              name="potencia"
+              type="text"
+              list="potencia-list"
+              placeholder="Ej: 10 MVA"
+            />
+            <datalist id="potencia-list">
+              <option value="5 MVA"></option>
+              <option value="10 MVA"></option>
+              <option value="15 MVA"></option>
+              <option value="20 MVA"></option>
+            </datalist>
+          </div>
+
+          <!-- TENSIÓN NOMINAL -->
+          <div class="field">
+            <label for="tension">Tensión nominal</label>
+            <input
+              id="tension"
+              name="tension"
+              type="text"
+              list="tension-list"
+              placeholder="Ej: 33/6,6 kV"
+            />
+            <datalist id="tension-list">
+              <option value="110/23 kV"></option>
+              <option value="66/13,2 kV"></option>
+              <option value="33/6,6 kV"></option>
+              <option value="23/6,6 kV"></option>
+            </datalist>
+          </div>
+
+          <!-- FABRICANTE -->
+          <div class="field">
+            <label for="fabricante">Fabricante</label>
+            <input
+              id="fabricante"
+              name="fabricante"
+              type="text"
+              list="fabricante-list"
+              placeholder="Ej: RHONA"
+            />
+            <datalist id="fabricante-list">
+              <option value="RHONA"></option>
+              <option value="ABB"></option>
+              <option value="Siemens Energy"></option>
+              <option value="Eaton"></option>
+            </datalist>
+          </div>
+
+          <!-- UBICACIÓN / PLANTA -->
+          <div class="field">
+            <label for="ubicacion">Ubicación / Planta</label>
+            <input
+              id="ubicacion"
+              name="ubicacion"
+              type="text"
+              list="ubicacion-list"
+              placeholder="Ej: Fábrica Viña / Patio pruebas"
+            />
+            <datalist id="ubicacion-list">
+              <option value="Fábrica Viña – Patio de pruebas"></option>
+              <option value="Planta Lampa – Nave de tableros"></option>
+              <option value="Mejillones – Subestación IEM"></option>
+            </datalist>
+          </div>
+
+          <!-- FECHA FAT -->
+          <div class="field">
+            <label for="fecha-fat">Fecha FAT</label>
+            <input id="fecha-fat" name="fecha-fat" type="date" />
+          </div>
+
+          <!-- ITO / CLIENTE -->
+          <div class="field">
+            <label for="ito">ITO / Representante cliente</label>
+            <input
+              id="ito"
+              name="ito"
+              type="text"
+              list="ito-list"
+              placeholder="Ej: ITO Eléctrico – Minera Antucoya"
+            />
+            <datalist id="ito-list">
+              <option value="Alejandro Elgueta – ITO Eléctrico"></option>
+              <option value="Eduardo Cabalín – Jefe de Proyecto"></option>
+              <option value="ITO QA/QC Cliente"></option>
+            </datalist>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN PRUEBAS FAT -->
+      <section class="card fat-section section-hidden" id="sec-pruebas">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon icon-green">2</span>
+            Resultados de pruebas FAT
+          </div>
+          <div class="card-help">
+            Paso 2 de 3: registra los resultados y comentarios de cada ensayo.
+          </div>
+        </div>
+
+        <table class="tabla-pruebas">
+          <thead>
+            <tr>
+              <th>Prueba</th>
+              <th>Norma / referencia</th>
+              <th>Resultado</th>
+              <th>Comentario</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- INSPECCIÓN VISUAL -->
+            <tr>
+              <td>
+                <label>Inspección visual y dimensional</label>
+                <div style="font-size:11px;color:var(--text-muted);">
+                  Estado general, rotulación, placa, grado IP, pintura, bornes.
+                </div>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60076 · RIC 13 Sala/Subestación</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-visual"
+                  placeholder="Ej: Golpes leves en tanque lado LV, sin daño estructural"
+                />
+                <datalist id="coment-visual">
+                  <option value="Sin observaciones relevantes, equipo en buen estado general"></option>
+                  <option value="Golpes leves en tanque lado LV, se registra en informe fotográfico"></option>
+                  <option value="Detalle de pintura superficial, requiere retoque en terreno"></option>
+                  <option value="Rotulación según planos y RIC 13, placa de características completa y legible"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- GRUPO VECTORIAL -->
+            <tr>
+              <td>
+                <label>Verificación de grupo vectorial</label>
+                <div style="font-size:11px;color:var(--text-muted);">
+                  Confirmación Dyn11 / YNd11 u otro según especificación.
+                </div>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60076-1 · Pliego técnico contrato</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-vectorial"
+                  placeholder="Ej: Grupo Dyn11 confirmado"
+                />
+                <datalist id="coment-vectorial">
+                  <option value="Grupo Dyn11 confirmado según placa y ensayo de fase-fase"></option>
+                  <option value="Grupo vectorial distinto al especificado, requiere revisión de ingeniería"></option>
+                  <option value="Ensayo realizado con equipo de prueba dedicado, registros adjuntos"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- RELACIÓN DE TRANSFORMACIÓN -->
+            <tr>
+              <td>
+                <label>Relación de transformación</label>
+                <div style="font-size:11px;color:var(--text-muted);">
+                  Medición en todas las derivaciones del TAP-changer.
+                </div>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60076-1 · IEC 60076-8</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-relacion"
+                  placeholder="Ej: Desviaciones &lt; 0,5 % respecto nominal"
+                />
+                <datalist id="coment-relacion">
+                  <option value="Desviaciones &lt; 0,5 % en todas las derivaciones, dentro de límite contractual"></option>
+                  <option value="Se detecta desviación puntual &gt; 0,5 %, se recomienda revisión de ingeniería"></option>
+                  <option value="Ensayo realizado en TAP nominal y extremos, planillas adjuntas"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- RESISTENCIA ÓHMICA -->
+            <tr>
+              <td>
+                <label>Resistencia óhmica de devanados</label>
+                <div style="font-size:11px;color:var(--text-muted);">
+                  Medida corregida a 75&nbsp;°C o según contrato.
+                </div>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60076-1 · IEC 60076-8</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-ohmica"
+                  placeholder="Ej: Valores dentro del ±2 % entre fases"
+                />
+                <datalist id="coment-ohmica">
+                  <option value="Valores dentro del ±2 % entre fases, sin desequilibrios significativos"></option>
+                  <option value="Se observa diferencia superior a ±2 %, revisar aprietes y conexión de bornes"></option>
+                  <option value="Mediciones corregidas a 75 °C, hoja de cálculo adjunta"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- PÉRDIDAS EN VACÍO -->
+            <tr>
+              <td>
+                <label>Pérdidas en vacío y corriente de excitación</label>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60076-1 · Contrato</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-vacio"
+                  placeholder="Ej: P0 dentro de tolerancia de contrato"
+                />
+                <datalist id="coment-vacio">
+                  <option value="P0 dentro de tolerancia contractual, curva U-I adjunta"></option>
+                  <option value="P0 supera tolerancia, informar a cliente para evaluación contractual"></option>
+                  <option value="Corriente de excitación normal para este diseño y potencia nominal"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- PÉRDIDAS EN CORTOCIRCUITO -->
+            <tr>
+              <td>
+                <label>Pérdidas en cortocircuito y tensión de cortocircuito</label>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60076-1 · Contrato</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-cc"
+                  placeholder="Ej: Uk y Pk dentro de tolerancias IEC / contrato"
+                />
+                <datalist id="coment-cc">
+                  <option value="Uk y Pk dentro de tolerancias IEC / contrato, sin observaciones"></option>
+                  <option value="Pk por sobre valor garantizado, requiere análisis con cliente"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- ENSAYO DIELÉCTRICO -->
+            <tr>
+              <td>
+                <label>Ensayo dieléctrico (tensión aplicada / inducida)</label>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60076-3</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-diel"
+                  placeholder="Ej: Oscilogramas sin deformaciones anómalas"
+                />
+                <datalist id="coment-diel">
+                  <option value="Oscilogramas sin deformaciones anómalas, sin disparos de protecciones"></option>
+                  <option value="Se detectó disparo en primera aplicación, se repite ensayo con resultado conforme"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- ACEITE / BDV -->
+            <tr>
+              <td>
+                <label>Ensayo de aceite aislante (BDV, humedad, DGA si aplica)</label>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60296 · IEC 60156</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-aceite"
+                  placeholder="Ej: BDV ≥ valor mínimo contractual"
+                />
+                <datalist id="coment-aceite">
+                  <option value="BDV sobre valor mínimo contractual, humedad dentro de límites"></option>
+                  <option value="BDV bajo lo especificado, se recomienda filtrado / tratamiento"></option>
+                  <option value="Análisis DGA sin gases de falla relevantes para transformador nuevo"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- VENTILACIÓN / ACCESORIOS -->
+            <tr>
+              <td>
+                <label>Verificación de ventilación y accesorios</label>
+                <div style="font-size:11px;color:var(--text-muted);">
+                  Ventiladores, termómetros, relés, buchholz, contadores, etc.
+                </div>
+              </td>
+              <td>
+                <span class="pill-norma">RIC 13 · Manual de fabricante</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-vent"
+                  placeholder="Ej: Etapas de ventilación operativas"
+                />
+                <datalist id="coment-vent">
+                  <option value="Etapas de ventilación operativas, pruebas de arranque manual y automático OK"></option>
+                  <option value="Se detecta ruido anormal en ventilador, recomendado cambio preventivo"></option>
+                  <option value="Accesorios de protección (relé de sobrepresión, buchholz, etc.) probados según protocolo"></option>
+                </datalist>
+              </td>
+            </tr>
+
+            <!-- PRUEBAS SECUNDARIOS / RELÉS -->
+            <tr>
+              <td>
+                <label>Pruebas de secundarios y contactos de relés / TC</label>
+              </td>
+              <td>
+                <span class="pill-norma">IEC 60255 · Plan de protección</span>
+              </td>
+              <td class="resultado-select">
+                <select>
+                  <option value="">—</option>
+                  <option value="ok">OK</option>
+                  <option value="nok">No OK</option>
+                  <option value="na">N/A</option>
+                </select>
+              </td>
+              <td>
+                <input
+                  class="comentario-input"
+                  type="text"
+                  list="coment-reles"
+                  placeholder="Ej: Contactos de relés probados según esquema"
+                />
+                <datalist id="coment-reles">
+                  <option value="Contactos de relés probados según esquema, continuidad y polaridad verificada"></option>
+                  <option value="Se detectan bornes invertidos en un TC, corregido en FAT"></option>
+                </datalist>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="footer-resumen" style="margin-top:12px;">
+          <small>
+            Revisa los resultados y comentarios antes de pasar al Paso 3 (Observaciones e informe).
+          </small>
+          <button class="btn-accion" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'});">
+            <span>⬆</span> Volver arriba
+          </button>
+        </div>
+      </section>
+
+      <!-- SECCIÓN OBSERVACIONES / INFORME / ADJUNTOS -->
+      <section class="card fat-section section-hidden" id="sec-obs">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon icon-purple">3</span>
+            Observaciones generales, informe y evidencias
+          </div>
+          <div class="card-help">
+            Paso 3 de 3: redacta las observaciones, genera el informe y registra los adjuntos.
+          </div>
+        </div>
+
+        <div class="combo-obs">
+          <div class="combo-obs-left">
+            <h4 style="font-size:13px;">Observaciones generales y acuerdos con el cliente</h4>
+            <select id="obs-tipo" onchange="aplicarComentarioTipo()">
+              <option value="">— Comentario tipo —</option>
+              <option value="Se realiza FAT en presencia de ITO cliente. Todas las pruebas obligatorias según contrato se ejecutan y resultan conformes, sin observaciones mayores. Se autoriza despacho del transformador a faena, sujeto a cierre de observaciones menores y revisión documental final.">
+                FAT conforme sin observaciones mayores
+              </option>
+              <option value="Se realiza FAT en presencia de ITO cliente. Las pruebas principales resultan conformes, pero se registran observaciones que deberán corregirse antes del despacho (detalles mecánicos, ajustes eléctricos y terminaciones menores). Se acuerda levantar punch list y realizar verificación posterior.">
+                FAT conforme con observaciones menores
+              </option>
+              <option value="Se realiza FAT en presencia de ITO cliente. Se detectan no conformidades relevantes en una o más pruebas, por lo que el transformador no se libera para despacho. El fabricante presenta plan de acción y se programa nueva FAT o repetición de ensayos críticos.">
+                FAT con no conformidades relevantes
+              </option>
+              <option value="Se ejecuta FAT parcial por restricciones de tiempo o disponibilidad de equipamiento. Se realizan solo las pruebas acordadas con el cliente y se difiere el resto para una segunda etapa. La liberación del transformador queda condicionada al cierre satisfactorio de los ensayos pendientes.">
+                FAT parcial / pruebas pendientes
+              </option>
+            </select>
+          </div>
+          <small>Elige un comentario tipo y después edítalo libremente en el cuadro de texto.</small>
+        </div>
+
+        <textarea
+          id="obs-texto"
+          class="obs-textarea"
+          placeholder="Ej: Se realiza FAT en presencia de ITO cliente. Todas las pruebas obligatorias según contrato se ejecutan y resultan conformes, salvo observaciones menores detalladas más arriba. Se acuerda levantar informe de punch list para correcciones antes del despacho..."
+        ></textarea>
+
+        <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+          <small style="color:var(--text-muted);">
+            Al generar el informe se usarán los datos de la ficha, los resultados de las
+            pruebas, este texto de observaciones y la lista de adjuntos.
+          </small>
+          <button class="btn-accion" type="button" onclick="generarInforme()">
+            <span>📝</span> Generar informe
+          </button>
+        </div>
+
+        <h4 style="font-size:13px;margin-top:14px;margin-bottom:6px;">Informe FAT generado (copiar y pegar a Word)</h4>
+        <textarea
+          id="informe-generado"
+          class="obs-textarea"
+          style="min-height:260px;"
+          placeholder="Aquí aparecerá el informe FAT listo para copiar y pegar en Word..."
+        ></textarea>
+
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:18px 0 12px;" />
+
+        <h4 style="font-size:13px;margin-bottom:6px;">Evidencias fotográficas y otros adjuntos (solo local)</h4>
+        <div class="field">
+          <small>
+            Puedes seleccionar fotos (.jpg, .png, etc.) y archivos (.pdf, .docx, .xlsx, etc.).
+            No se suben a internet: solo se previsualizan en tu navegador para que sepas qué vas a
+            adjuntar al informe.
+          </small>
+          <input
+            id="evidencias"
+            type="file"
+            multiple
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv"
+            onchange="previsualizarAdjuntos(event)"
+            style="margin-top:6px;"
+          />
+        </div>
+
+        <div id="preview-adjuntos" class="preview-adjuntos"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Tabs: muestran/ocultan secciones
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.fat-section');
+
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+
+        navBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        sections.forEach(sec => {
+          if (sec.id === targetId) {
+            sec.classList.remove('section-hidden');
+          } else {
+            sec.classList.add('section-hidden');
+          }
+        });
+
+        window.scrollTo({
+          top: document.querySelector('.app-header').offsetTop,
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    function valorCampo(id, porDefecto) {
+      const el = document.getElementById(id);
+      if (!el) return porDefecto;
+      const v = (el.value || '').trim();
+      return v !== '' ? v : porDefecto;
+    }
+
+    function formatearFechaISO(valor) {
+      if (!valor) return "[Fecha FAT]";
+      const partes = valor.split("-");
+      if (partes.length !== 3) return valor;
+      const [y, m, d] = partes;
+      return d + "-" + m + "-" + y;
+    }
+
+    function textoResultado(code) {
+      if (code === "ok") return "Conforme";
+      if (code === "nok") return "No conforme";
+      if (code === "na") return "No aplica";
+      return "No informado";
+    }
+
+    function aplicarComentarioTipo() {
+      const select = document.getElementById("obs-tipo");
+      const texto = select.value;
+      if (!texto) return;
+      const ta = document.getElementById("obs-texto");
+      if (!ta.value.trim()) {
+        ta.value = texto;
+      } else {
+        ta.value = ta.value.trim() + "\n\n" + texto;
+      }
+    }
+
+    function generarInforme() {
+      const proyecto = valorCampo("proyecto", "[Proyecto / Faena]");
+      const ot = valorCampo("ot", "[OT / Contrato]");
+      const equipo = valorCampo("equipo", "[Identificación equipo]");
+      const potencia = valorCampo("potencia", "[Potencia nominal]");
+      const tension = valorCampo("tension", "[Tensión nominal]");
+      const fabricante = valorCampo("fabricante", "[Fabricante]");
+      const ubicacion = valorCampo("ubicacion", "[Ubicación / Planta]");
+      const fechaFAT = formatearFechaISO(
+        document.getElementById("fecha-fat").value
+      );
+      const ito = valorCampo("ito", "[ITO / Representante cliente]");
+      const obsGlobal = valorCampo(
+        "obs-texto",
+        "[Agregar observaciones generales y acuerdos con el cliente.]"
+      );
+
+      const filas = document.querySelectorAll(".tabla-pruebas tbody tr");
+      let resumenPruebas = "";
+      let total = 0;
+      let ok = 0;
+      let nok = 0;
+      let na = 0;
+
+      filas.forEach((fila, idx) => {
+        const nombre = fila.querySelector("label")
+          ? fila.querySelector("label").innerText.trim()
+          : "Prueba " + (idx + 1);
+        const normaEl = fila.querySelector(".pill-norma");
+        const norma = normaEl ? normaEl.innerText.trim() : "";
+        const select = fila.querySelector("select");
+        const resultadoCode = select ? select.value : "";
+        const resultado = textoResultado(resultadoCode);
+        const comentarioInput = fila.querySelector("input");
+        const comentario = comentarioInput
+          ? (comentarioInput.value || "").trim()
+          : "";
+
+        if (resultadoCode) {
+          total++;
+          if (resultadoCode === "ok") ok++;
+          else if (resultadoCode === "nok") nok++;
+          else if (resultadoCode === "na") na++;
+        }
+
+        resumenPruebas +=
+          "- " +
+          nombre +
+          (norma ? " (" + norma + ")" : "") +
+          "\n" +
+          "  Resultado: " +
+          resultado +
+          ".\n" +
+          "  Comentario: " +
+          (comentario !== "" ? comentario : "Sin comentario adicional.") +
+          "\n\n";
+      });
+
+      let resumenNumerico = "";
+      if (total > 0) {
+        resumenNumerico =
+          "Durante la FAT se registran " +
+          total +
+          " pruebas con resultado:\n" +
+          "  • " +
+          ok +
+          " conforme(s)\n" +
+          "  • " +
+          nok +
+          " no conforme(s)\n" +
+          "  • " +
+          na +
+          " no aplica\n\n";
+      }
+
+      const evidInput = document.getElementById("evidencias");
+      let evidenciasTexto = "";
+      let anexoTexto = "";
+      let listaArchivos = "";
+
+      if (evidInput && evidInput.files && evidInput.files.length > 0) {
+        listaArchivos = "";
+        Array.from(evidInput.files).forEach(f => {
+          listaArchivos += "  - " + f.name + "\n";
+        });
+
+        evidenciasTexto =
+          "7. Evidencias fotográficas y adjuntos\n" +
+          "Las evidencias se adjuntan como ANEXO 1 – Evidencias fotográficas FAT. A continuación se deja el listado de archivos registrados:\n" +
+          listaArchivos +
+          "\n";
+
+        anexoTexto =
+          "ANEXO 1 – Evidencias fotográficas FAT\n" +
+          "Listado de archivos asociados a la FAT del transformador:\n" +
+          listaArchivos +
+          "\n";
+      } else {
+        evidenciasTexto =
+          "7. Evidencias fotográficas y adjuntos\n" +
+          "Las evidencias se incorporarán como ANEXO 1 – Evidencias fotográficas FAT (fotografías del equipo, planillas de ensayo, registros de instrumentos, etc.), según registro del ITO eléctrico.\n\n";
+
+        anexoTexto =
+          "ANEXO 1 – Evidencias fotográficas FAT\n" +
+          "Se adjuntan las evidencias fotográficas y documentales correspondientes a la FAT, de acuerdo con lo indicado en el punto 7 del informe. El detalle de archivos se mantiene en el registro del ITO eléctrico.\n\n";
+      }
+
+      let informe = "";
+
+      informe +=
+        "INFORME DE PRUEBAS FAT\n" +
+        "Transformador de poder " +
+        equipo +
+        " – " +
+        potencia +
+        " – " +
+        tension +
+        "\n\n";
+
+      informe +=
+        "Proyecto / Faena: " +
+        proyecto +
+        "\n" +
+        "OT / Contrato: " +
+        ot +
+        "\n" +
+        "Fabricante: " +
+        fabricante +
+        "\n" +
+        "Lugar de pruebas: " +
+        ubicacion +
+        "\n" +
+        "Fecha FAT: " +
+        fechaFAT +
+        "\n" +
+        "ITO / Representante cliente: " +
+        ito +
+        "\n\n";
+
+      informe +=
+        "1. Objetivo del informe\n" +
+        "El presente documento registra los ensayos FAT (Factory Acceptance Test) realizados al transformador de poder indicado, verificando su cumplimiento respecto del contrato y de las normas aplicables.\n\n";
+
+      informe +=
+        "2. Alcance\n" +
+        "El alcance considera la revisión de datos de placa, la ejecución de las pruebas FAT rutinarias y de tipo indicadas en el pliego técnico, la verificación de documentación asociada y el levantamiento de observaciones y punch list, si corresponde.\n\n";
+
+      informe +=
+        "3. Normativa y documentos de referencia (resumen)\n" +
+        "- IEC 60076 (Transformadores de potencia: requisitos generales, ensayos dieléctricos, pruebas adicionales).\n" +
+        "- IEC 60296 e IEC 60156 (aceite aislante y ensayo de rigidez dieléctrica BDV).\n" +
+        "- IEC 60255 (relés de protección y dispositivos asociados).\n" +
+        "- RIC 13 – Subestaciones y salas eléctricas (SEC, Chile).\n" +
+        "- Especificaciones técnicas del contrato y planos de ingeniería del proyecto.\n\n";
+
+      informe +=
+        "4. Descripción del equipo ensayado (resumen)\n" +
+        "- Identificación: " +
+        equipo +
+        "\n" +
+        "- Potencia nominal: " +
+        potencia +
+        "\n" +
+        "- Tensión nominal: " +
+        tension +
+        "\n" +
+        "- Fabricante: " +
+        fabricante +
+        "\n\n";
+
+      informe +=
+        "5. Ensayos realizados y resultados (resumen)\n" +
+        (resumenNumerico || "") +
+        resumenPruebas;
+
+      informe +=
+        "6. Observaciones y acuerdos con el cliente\n" +
+        obsGlobal +
+        "\n\n";
+
+      informe += evidenciasTexto;
+
+      informe +=
+        "8. Conclusión\n" +
+        "En base a los resultados obtenidos y a las observaciones registradas, el ITO eléctrico concluye si el equipo se considera apto para su despacho a faena, sujeto al cierre de la punch list y a las acciones correctivas acordadas con el fabricante.\n\n";
+
+      informe += anexoTexto;
+
+      informe +=
+        "Firmas:\n" +
+        "  Por el fabricante: ________________________________\n" +
+        "  Por el cliente / ITO Eléctrico: Alejandro Elgueta Zarhi\n";
+
+      const salida = document.getElementById("informe-generado");
+      if (salida) {
+        salida.value = informe;
+        navBtns.forEach(b => {
+          if (b.dataset.target === "sec-obs") {
+            b.classList.add("active");
+          } else {
+            b.classList.remove("active");
+          }
+        });
+        sections.forEach(sec => {
+          sec.classList.add("section-hidden");
+        });
+        document.getElementById("sec-obs").classList.remove("section-hidden");
+      }
+    }
+
+    function previsualizarAdjuntos(event) {
+      const cont = document.getElementById("preview-adjuntos");
+      cont.innerHTML = "";
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+
+      Array.from(files).forEach(file => {
+        const item = document.createElement("div");
+        item.className = "preview-item";
+
+        const tag = document.createElement("div");
+        tag.className = "preview-tag";
+        tag.textContent = file.type.startsWith("image/") ? "Foto" : "Archivo";
+        item.appendChild(tag);
+
+        if (file.type.startsWith("image/")) {
+          const img = document.createElement("img");
+          img.src = URL.createObjectURL(file);
+          img.alt = file.name;
+          item.appendChild(img);
+        }
+
+        const name = document.createElement("div");
+        name.className = "preview-name";
+        name.textContent = file.name;
+        item.appendChild(name);
+
+        cont.appendChild(item);
+      });
+    }
+  </script>
 </body>
 </html>
