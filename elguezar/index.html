@@ -1834,12 +1834,24 @@ const SFX=(()=>{let ctx=null,on=true;try{on=localStorage.getItem('ae_snd')!=='0'
  return{get on(){return on},toggle(){on=!on;try{localStorage.setItem('ae_snd',on?'1':'0')}catch(e){}if(on){ac();tone(660,990,.12,'sine',.05)}return on},
   nav:zap,click(){tone(1400,900,.05,'square',.012)},
   ok(){tone(660,0,.14,'sine',.05);tone(990,0,.22,'sine',.045,.1)},
-  fail(){tone(196,147,.28,'sawtooth',.03)},ready:()=>!!ctx,wake(){if(on)ac()}};
+  fail(){tone(196,147,.28,'sawtooth',.03)},ready:()=>!!ctx,wake(){if(on){const c=ac();if(c)AMB.start(c)}},ctx:()=>ctx};
 })();
 window.aeSfx=SFX;
+/* ---------- fondo: zumbido de subestación (50 Hz y armónicos) muy suave ---------- */
+const AMB=(()=>{let g=null,started=false;
+ function start(){const c=window.__aeCtx||(window.__aeCtx=null);}
+ return{start(ctx){if(started||!ctx)return;started=true;const t=ctx.currentTime;g=ctx.createGain();g.gain.setValueAtTime(0,t);
+   const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;g.connect(ctx.destination);lp.connect(g);
+   [[50,.5],[100,1],[150,.35],[200,.22],[300,.08]].forEach(([f,v])=>{const o=ctx.createOscillator(),og=ctx.createGain();o.type='sine';o.frequency.value=f;og.gain.value=v;o.connect(og).connect(lp);o.start()});
+   const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=.13;lg.gain.value=.004;lfo.connect(lg).connect(g.gain);lfo.start();
+   const b=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()<.0006?(Math.random()*2-1):(Math.random()*2-1)*.02;
+   const n=ctx.createBufferSource();n.buffer=b;n.loop=true;const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=2500;const ng=ctx.createGain();ng.gain.value=.5;n.connect(hp).connect(ng).connect(g);n.start();
+   this.set(SFX.on)},
+  set(on){if(!g)return;const c=g.context,t=c.currentTime;g.gain.cancelScheduledValues(t);g.gain.setValueAtTime(g.gain.value,t);g.gain.linearRampToValueAtTime(on&&!document.hidden?.012:0,t+(on?2.5:.4))}};})();
+document.addEventListener('visibilitychange',()=>AMB.set(SFX.on));
 const sb=document.getElementById('sndBtn');
 const syncSnd=()=>{sb.classList.toggle('off',!SFX.on);sb.setAttribute('aria-label',SFX.on?'Sonido activado':'Sonido desactivado')};syncSnd();
-sb.onclick=e=>{e.stopPropagation();SFX.toggle();syncSnd()};
+sb.onclick=e=>{e.stopPropagation();SFX.toggle();syncSnd();if(SFX.on)SFX.wake();AMB.set(SFX.on)};
 document.addEventListener('pointerdown',e=>{SFX.wake();const t=e.target.closest('button,.cta,select,.ccard,.door,summary,input[type=checkbox]');if(t&&t!==sb&&!t.closest('a[href^="#"]'))SFX.click()},true);
 window.aeToast=t=>toast(t);
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)}
