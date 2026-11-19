@@ -1830,11 +1830,11 @@ document.getElementById('burger').onclick=()=>document.getElementById('nav').cla
 const SFX=(()=>{let ctx=null,on=true;try{on=localStorage.getItem('ae_snd')!=='0'}catch(e){}
  const ac=()=>{if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}if(ctx.state==='suspended')ctx.resume();return ctx};
  function tone(f1,f2,dur,type='sine',vol=.05,delay=0){const c=ac();if(!c||!on)return;const t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.02)}
- function zap(){const c=ac();if(!c||!on)return;const t=c.currentTime,len=.18,b=c.createBuffer(1,c.sampleRate*len,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const n=c.createBufferSource();n.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=6;f.frequency.setValueAtTime(600,t);f.frequency.exponentialRampToValueAtTime(4200,t+len);const g=c.createGain();g.gain.setValueAtTime(.035,t);g.gain.exponentialRampToValueAtTime(.0001,t+len);n.connect(f).connect(g).connect(c.destination);n.start(t);tone(220,880,.16,'triangle',.025)}
+ function zap(){const c=ac();if(!c||!on)return;const t=c.currentTime,len=.18,b=c.createBuffer(1,c.sampleRate*len,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const n=c.createBufferSource();n.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=6;f.frequency.setValueAtTime(600,t);f.frequency.exponentialRampToValueAtTime(4200,t+len);const g=c.createGain();g.gain.setValueAtTime(.09,t);g.gain.exponentialRampToValueAtTime(.0001,t+len);n.connect(f).connect(g).connect(c.destination);n.start(t);tone(220,880,.16,'triangle',.06)}
  return{get on(){return on},toggle(){on=!on;try{localStorage.setItem('ae_snd',on?'1':'0')}catch(e){}if(on){ac();tone(660,990,.12,'sine',.05)}return on},
-  nav:zap,click(){tone(1400,900,.05,'square',.012)},
-  ok(){tone(660,0,.14,'sine',.05);tone(990,0,.22,'sine',.045,.1)},
-  fail(){tone(196,147,.28,'sawtooth',.03)},ready:()=>!!ctx,wake(){if(on){const c=ac();if(c)AMB.start(c)}},ctx:()=>ctx};
+  nav:zap,click(){tone(1400,900,.05,'square',.03)},
+  ok(){tone(660,0,.14,'sine',.09);tone(990,0,.22,'sine',.08,.1)},
+  fail(){tone(196,147,.28,'sawtooth',.05)},ready:()=>!!ctx,wake(){if(on){const c=ac();if(c)AMB.start(c)}},ctx:()=>ctx};
 })();
 window.aeSfx=SFX;
 /* ---------- fondo: zumbido de subestación (50 Hz y armónicos) muy suave ---------- */
