@@ -46,6 +46,8 @@ nav.main a.on{opacity:1;background:rgba(127,127,127,.16)}
 .lang{display:flex;border:1px solid currentColor;border-radius:999px;overflow:hidden;margin-left:8px;opacity:.85}
 .lang button{padding:5px 10px;font-size:12px;font-weight:600}
 .lang button.on{background:var(--orange);color:#141821}
+.snd{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;margin-left:6px;border:1px solid currentColor;opacity:.8;transition:.2s}.snd:hover{opacity:1}.snd svg{width:18px;height:18px}.snd .x{display:none}.snd.off .w{display:none}.snd.off .x{display:block}
+@media (max-width:860px){.snd{margin:10px 0 0}}
 .burger{display:none;width:42px;height:42px;border-radius:12px;place-items:center}
 .burger span{display:block;width:20px;height:2px;background:currentColor;margin:4px auto;transition:.3s}
 @media (max-width:860px){
@@ -403,6 +405,7 @@ details.ric[open] .rn b{color:var(--blue)}
       <a href="#estudio" data-r="estudio" data-i="nav3">Estudio</a>
       <a href="#calculadoras" data-r="calculadoras" data-i="nav5">Calculadoras</a>
       <a href="#contacto" data-r="contacto" data-i="nav4">Contacto</a>
+      <button class="snd" id="sndBtn" type="button" aria-label="Sonido activado" title="Sonido"><svg viewBox="0 0 24 24" class="i"><path d="M11 5L6 9H3v6h3l5 4z"/><path class="w" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="x" d="M16 9l6 6M22 9l-6 6"/></svg></button>
       <div class="lang"><button data-l="es" class="on">ES</button><button data-l="en">EN</button></div>
     </nav>
   </div>
@@ -1510,6 +1513,7 @@ function bindForm(c) {
 }
 function renderCalcKeep(c) { const v = state[c.id]; $('#cvf').innerHTML = c.inputs.map(i => field(c, i, v)).join('') + '<div class="cv-act"><button type="button" class="cta s sm" id="cvreset">Restablecer valores</button></div>'; compute(c); }
 let lastText = '';
+const lastVerdict = {};
 function compute(c) {
   const v = state[c.id]; let res;
   const bad = c.inputs.filter(i => !i.type && (!i.show || i.show(v)) && (v[i.k] === '' || !isFinite(v[i.k])));
@@ -1518,6 +1522,7 @@ function compute(c) {
   const out = $('#cvr');
   if (res.err) { out.innerHTML = `<div class="rbox"><div class="warn">${res.err}</div></div>`; return; }
   const ver = (res.checks || []).filter(x => x.ok !== null); const allOk = ver.every(x => x.ok);
+  const vk = ver.length ? (allOk ? 'ok' : 'fail') : null; if (vk && window.aeSfx && window.aeSfx.ready() && lastVerdict[c.id] !== undefined && lastVerdict[c.id] !== vk) window.aeSfx[vk](); if (vk) lastVerdict[c.id] = vk;
   out.innerHTML = `<div class="rbox ${ver.length ? (allOk ? 'pass' : 'fail') : ''}">
     ${ver.length ? `<div class="verdict">${allOk ? 'CUMPLE' : 'NO CUMPLE'}</div>` : ''}
     <div class="kpis">${res.main.map(m => `<div class="kpi ${m.big ? 'big' : ''}"><span>${m.l}</span><b>${m.v}${m.u ? ` <small>${m.u}</small>` : ''}</b></div>`).join('')}</div>
@@ -1816,10 +1821,26 @@ function go(){
 const H=document.getElementById('hdr');
 function hdr(){const s=scrollY>40;H.classList.toggle('solid',s);H.classList.toggle('dark',!s?!!DARKTOP[route]:false)}
 addEventListener('scroll',hdr,{passive:true});
-addEventListener('hashchange',go);
+addEventListener('hashchange',()=>{if(SFX.ready())SFX.nav();go()});
 document.getElementById('burger').onclick=()=>document.getElementById('nav').classList.toggle('open');
 
 /* toast + copy */
+
+/* ---------- sonidos (Web Audio, sin archivos) ---------- */
+const SFX=(()=>{let ctx=null,on=true;try{on=localStorage.getItem('ae_snd')!=='0'}catch(e){}
+ const ac=()=>{if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}if(ctx.state==='suspended')ctx.resume();return ctx};
+ function tone(f1,f2,dur,type='sine',vol=.05,delay=0){const c=ac();if(!c||!on)return;const t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.02)}
+ function zap(){const c=ac();if(!c||!on)return;const t=c.currentTime,len=.18,b=c.createBuffer(1,c.sampleRate*len,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const n=c.createBufferSource();n.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.Q.value=6;f.frequency.setValueAtTime(600,t);f.frequency.exponentialRampToValueAtTime(4200,t+len);const g=c.createGain();g.gain.setValueAtTime(.035,t);g.gain.exponentialRampToValueAtTime(.0001,t+len);n.connect(f).connect(g).connect(c.destination);n.start(t);tone(220,880,.16,'triangle',.025)}
+ return{get on(){return on},toggle(){on=!on;try{localStorage.setItem('ae_snd',on?'1':'0')}catch(e){}if(on){ac();tone(660,990,.12,'sine',.05)}return on},
+  nav:zap,click(){tone(1400,900,.05,'square',.012)},
+  ok(){tone(660,0,.14,'sine',.05);tone(990,0,.22,'sine',.045,.1)},
+  fail(){tone(196,147,.28,'sawtooth',.03)},ready:()=>!!ctx,wake(){if(on)ac()}};
+})();
+window.aeSfx=SFX;
+const sb=document.getElementById('sndBtn');
+const syncSnd=()=>{sb.classList.toggle('off',!SFX.on);sb.setAttribute('aria-label',SFX.on?'Sonido activado':'Sonido desactivado')};syncSnd();
+sb.onclick=e=>{e.stopPropagation();SFX.toggle();syncSnd()};
+document.addEventListener('pointerdown',e=>{SFX.wake();const t=e.target.closest('button,.cta,select,.ccard,.door,summary,input[type=checkbox]');if(t&&t!==sb&&!t.closest('a[href^="#"]'))SFX.click()},true);
 window.aeToast=t=>toast(t);
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)}
 async function copy(t){try{await navigator.clipboard.writeText(t);toast(L==='es'?'Copiado':'Copied')}catch(e){toast(t)}}
