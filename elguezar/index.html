@@ -390,6 +390,16 @@ details.ric[open] .rn b{color:var(--blue)}
 @media (max-width:620px){.m18 li{grid-template-columns:1fr}.mp{grid-row:auto}}
 .chk-l li.i{background:#F1F4F8}.chk-l li.i::before{content:"•";color:#2A8FD6}
 
+.featapp{display:flex;align-items:center;gap:16px;margin:6px 0 18px;padding:18px 20px;border-radius:16px;background:linear-gradient(120deg,#0E1A30,#1B2E52);color:#fff;text-decoration:none;border:1px solid rgba(255,200,40,.45);box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .2s}
+.featapp:hover{transform:translateY(-2px)}
+.featapp .fa-ic{font-size:34px;color:#FFC828}
+.featapp .fa-tx{flex:1;display:flex;flex-direction:column;gap:3px}
+.featapp .fa-k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#FFC828;font-weight:700}
+.featapp b{font-size:20px}
+.featapp .fa-tx span:last-child{font-size:14px;color:#C9D6EA}
+.featapp .fa-go{font-weight:800;color:#FFC828;white-space:nowrap}
+@media(max-width:600px){.featapp{flex-wrap:wrap}.featapp .fa-go{width:100%;text-align:right}}
+
 </style>
 </head>
 <body>
@@ -715,6 +725,7 @@ details.ric[open] .rn b{color:var(--blue)}
         <div class="toggle" id="calc-filter"><button class="on" data-f="all">Todas</button><button data-f="cond">Conductores</button><button data-f="dem">Demanda</button><button data-f="prot">Protecciones</button><button data-f="tierra">Puesta a tierra</button></div>
         <input id="calc-search" class="search" type="search" placeholder="Buscar: malla, motor, ducto, Zs…" aria-label="Buscar calculadora">
       </div>
+      <a class="featapp" href="tablero.html"><span class="fa-ic">▦</span><span class="fa-tx"><span class="fa-k">Nueva app · RIC 02 + RIC 04</span><b>Dimensionador de tableros eléctricos</b><span>Circuitos, reserva 25 %, barras (tabla 2.3), cableado interno (tabla 4.4 A1), distancias, IP, instrumentos y placa de datos.</span></span><span class="fa-go">Abrir →</span></a>
       <p class="note" id="calc-count"></p>
       <div class="cgrid" id="calc-grid"></div>
       <div class="disclaimer"><b>Herramienta de apoyo.</b> Los resultados no reemplazan el proyecto firmado por un instalador autorizado ni la verificación en terreno. Cada cálculo indica el pliego, el punto y la tabla que usa, y separa lo que es exigencia normativa de lo que es supuesto de cálculo. Pliegos vigentes del DS N°8/2019; RIC 15 en su versión 2024.</div>
@@ -1410,7 +1421,7 @@ const CATS = { cond: { n: 'Conductores y canalizaciones', c: '#2A8FD6' }, dem: {
 /* ================= FICHAS DE LOS 19 PLIEGOS ================= */
 const PLIEGOS = [
  ['01', 'Empalmes', 'Exigencias generales para los empalmes de baja y media tensión de las instalaciones de consumo.', ['Materiales y equipos (sección 6), condiciones de diseño (sección 7) y protecciones o limitadores (sección 8).', 'La capacidad del empalme se fija con la potencia instalada corregida por los factores de demanda del RIC 03 (RIC 18, 5.4).', 'Vivienda: protección mínima del empalme de 25 A y alimentador ≥ 4 mm² (RIC 10, 5.2).'], ['demanda', 'viviendas', 'cc']],
- ['02', 'Tableros eléctricos', 'Requisitos de seguridad de los tableros de las instalaciones de consumo.', ['Espacios de trabajo (tabla 2.1): 0,90 / 1,20 / 1,50 m según la condición; frente con partes descubiertas: 1,50 m.', 'Acceso mínimo 0,80 m × 2,20 m, puertas que abren hacia afuera.', 'Distancias entre partes energizadas desnudas (tabla 2.2).', 'Grado de protección: IP41 interior, IP44 exterior bajo techo, IP54 intemperie, IPX4 lugares mojados.', 'Capacidad de barras de cobre (tabla 2.3).'], ['barras']],
+ ['02', 'Tableros eléctricos', 'Requisitos de seguridad de los tableros de las instalaciones de consumo.', ['Espacios de trabajo (tabla 2.1): 0,90 / 1,20 / 1,50 m según la condición; frente con partes descubiertas: 1,50 m.', 'Acceso mínimo 0,80 m × 2,20 m, puertas que abren hacia afuera.', 'Distancias entre partes energizadas desnudas (tabla 2.2).', 'Grado de protección: IP41 interior, IP44 exterior bajo techo, IP54 intemperie, IPX4 lugares mojados.', 'Capacidad de barras de cobre (tabla 2.3).', 'Dimensionamiento completo del tablero: <a href="tablero.html">abrir el Dimensionador de tableros →</a>'], ['barras']],
  ['03', 'Alimentadores y demanda', 'Dimensionamiento de alimentadores, subalimentadores y demanda de la instalación.', ['Sección mínima: 4 mm² alimentadores y 2,5 mm² subalimentadores (5.1.2).', 'Caída de tensión ≤ 3 % y total ≤ 5 % en el punto más desfavorable (5.1.3).', 'Shafts de alimentadores RF120, cables libres de halógenos, bandejas ≤ 40 % de ocupación.', 'Factores de demanda (tabla 3.1) y simultaneidad de viviendas (tabla 3.2).', 'Neutro con cargas no lineales según 6.4.3.'], ['demanda', 'viviendas', 'caida', 'conductor']],
  ['04', 'Conductores, materiales y canalizaciones', 'Requisitos de conductores, materiales y sistemas de canalización.', ['Capacidad de transporte (tabla 4.4) por método de instalación A1 a F, a 70 °C y 90 °C.', 'Factores por agrupamiento (4.6) y temperatura (4.7): Ic = It × fn × ft.', 'Resistencia máxima de conductores (tabla 4.1) y conductores desnudos (tabla 4.3).', 'Ocupación de tuberías (tabla 4.21) y diámetros nominales (tablas 4.17 a 4.20 y 4.29).', 'Radios de curvatura: 4, 8 o 12 veces el diámetro exterior según el tipo de cable.'], ['conductor', 'capacidad', 'ducto', 'desnudo']],
  ['05', 'Protección contra tensiones peligrosas', 'Medidas de protección contra contactos directos e indirectos y descargas eléctricas.', ['Tensión de seguridad: 50 V CA / 120 V CC en lugares secos; 24 V CA / 60 V CC húmedos o mojados (5.8).', 'Piso aislante: más de 50.000 Ω (5.9).', 'Esquema TN: corte automático en 0,4 s para 220 V (tabla 5.1).', 'Esquema TT: RA · Ia ≤ UL, con diferenciales ≤ 30 mA.', 'Esquema IT: monitor permanente de aislamiento y condiciones de segundo defecto (tabla 5.2).'], ['tn', 'tt']],
