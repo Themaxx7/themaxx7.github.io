@@ -400,6 +400,11 @@ details.ric[open] .rn b{color:var(--blue)}
 .featapp .fa-go{font-weight:800;color:#FFC828;white-space:nowrap}
 @media(max-width:600px){.featapp{flex-wrap:wrap}.featapp .fa-go{width:100%;text-align:right}}
 
+.mg{display:grid;grid-template-columns:1fr minmax(260px,360px);gap:56px;align-items:center}
+.mg-phone{border-radius:30px;padding:10px;background:#0b0f17;box-shadow:0 30px 60px -24px rgba(20,24,33,.5),inset 0 0 0 1px rgba(255,255,255,.07)}
+.mg-phone video{display:block;width:100%;aspect-ratio:9/16;border-radius:22px;background:#02050B}
+.mg .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+@media (max-width:820px){.mg{grid-template-columns:1fr;gap:32px}.mg-phone{max-width:340px;margin:0 auto}}
 </style>
 </head>
 <body>
@@ -490,6 +495,18 @@ details.ric[open] .rn b{color:var(--blue)}
         <div class="pill"><span class="ic" style="--bg:#FEF0DC;--fg:#C86F00"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg></span><div><h4 data-i="p2t">Trazabilidad documental</h4><p data-i="p2p">Protocolos, paquetes de entrega y pendientes ordenados y cerrables.</p></div></div>
         <div class="pill"><span class="ic" style="--bg:#F1EAFE;--fg:#7B4FD0"><svg class="i" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span><div><h4 data-i="p3t">Entregas rápidas y claras</h4><p data-i="p3p">Informes, presentaciones y piezas visuales listas para usar.</p></div></div>
       </div>
+    </div>
+  </div>
+  <div class="sec" id="motion">
+    <div class="wrap mg reveal">
+      <div>
+        <div class="eyebrow">Motion graphics</div>
+        <h2>Ingeniería eléctrica en 40 segundos.</h2>
+        <p class="sub">Pieza vertical producida con código: subestaciones de 220 kV, diagramas unilineales, salas eléctricas, precomisionamiento de motores y variadores, y la identidad de Elguezar SpA. Música y efectos de sonido originales, sintetizados para esta pieza.</p>
+        <div class="tags"><span class="chip b">Subestaciones</span><span class="chip b">ITO</span><span class="chip b">Salas eléctricas y CCM</span><span class="chip o">Precomisionamiento</span></div>
+        <div class="ctas"><a class="cta s" href="#estudio">Ver el estudio</a></div>
+      </div>
+      <div class="mg-phone"><video src="media/elguezar-40s.mp4" poster="media/elguezar-40s-poster.jpg" controls playsinline preload="metadata" aria-label="Video ELGUEZAR SpA, 40 segundos"></video></div>
     </div>
   </div>
   <div class="sec alt" id="nosotros">
