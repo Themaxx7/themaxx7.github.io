@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba respaldo UPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: protocolo de terreno sobrio y exacto, llenado con el teléfono dentro de la sala.
+   IDEA: hoja de protocolo de pruebas por etapas, como el informe Sigma para Nueva Centinela.
+   PICTURE: el formulario mismo, el tablero de resultados y la curva de descarga V vs minutos.
+   COLOUR and TYPE: blanco, navy #1c233e, naranjo Sigma #d45221, teal #1aa39a; estados verde/ámbar/rojo; IBM Plex.
+   LAYOUT: encabezado con logos, secciones desplegables numeradas, pie navy con firma. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#10141f);--soft:light-dark(#f5f7f9,#171c2b);--ink:light-dark(#1c233e,#e9ecf5);--mut:light-dark(#5a6378,#a3abc0);--line:light-dark(#dde2ea,#2b3247);
+--nav:#1c233e;--or:light-dark(#d45221,#f07a45);--or2:#e8731b;--tl:light-dark(#13857e,#3cc9be);--tlbg:light-dark(#e2f4f2,#123733);
+--ok:light-dark(#2e9e5b,#4fcf84);--okbg:light-dark(#e5f5ec,#143222);--bad:light-dark(#c62f26,#ff7a70);--badbg:light-dark(#fbe7e5,#3b1715);--warn:light-dark(#a8700f,#f0b445);--warnbg:light-dark(#fdf3df,#3a2c10);--in:light-dark(#ffffff,#10141f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "IBM Plex Sans",system-ui,sans-serif;overflow-x:clip}
+h1,h2,.cond{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
+h1{font-size:clamp(24px,5.4vw,36px);line-height:1.08;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--or)}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:8px}
+.brand img{max-height:44px;max-width:42%;object-fit:contain}
+.hero{max-width:920px;margin:0 auto;padding:18px max(4vw,14px) 0}
+.hero p{margin:6px 0 0;color:var(--mut)}
+.bar{height:4px;background:var(--soft);margin-top:14px;border-radius:2px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--or),var(--or2));width:0;transition:width .4s}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px max(4vw,14px);box-shadow:0 4px 14px -12px #1c233e}
+.tin{max-width:920px;margin:0 auto}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.top select{flex:1 1 220px;font-weight:600}
+.st{font-size:13px;color:var(--mut);white-space:nowrap}.st.ok{color:var(--ok)}.st.err{color:var(--bad)}
+.nav{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px}
+.nav a{flex:none;font-size:13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 12px;display:flex;gap:6px;align-items:center}
+.nav a i{width:8px;height:8px;border-radius:50%;background:var(--line)}.nav a i.p{background:var(--or2)}.nav a i.f{background:var(--ok)}
+main{max-width:920px;margin:0 auto;padding:12px max(4vw,14px) 30px}
+details{border:1px solid var(--line);border-radius:12px;margin-top:12px;background:var(--bg);scroll-margin-top:120px}
+details[open]{border-color:var(--ink)}
+summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px;min-height:56px}
+summary::-webkit-details-marker{display:none}
+summary .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--nav);color:#fff;display:grid;place-items:center;font:700 15px "IBM Plex Sans Condensed",sans-serif}
+details[open] summary .n{background:var(--or)}
+summary h2{font-size:20px;line-height:1.15;margin:0;flex:1}
+summary .c{font-size:13px;color:var(--mut);white-space:nowrap}
+summary::after{content:"";flex:none;width:10px;height:10px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(45deg);margin:0 6px 4px}
+details[open] summary::after{transform:rotate(-135deg);margin-bottom:-4px}
+.body{padding:0 14px 16px;border-top:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:12px 14px;margin-top:14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:4px}
+.u{font-weight:400}
+input,select,textarea{width:100%;font:16px/1.3 "IBM Plex Sans",sans-serif;color:var(--ink);background:var(--in);border:1px solid var(--line);border-radius:8px;padding:10px;min-height:46px}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+textarea{min-height:76px;resize:vertical}
+input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+input:focus,select:focus,textarea:focus,button:focus-visible,summary:focus-visible{outline:2px solid var(--or);outline-offset:1px}
+.filled{border-color:light-dark(#b9c3d3,#3d4660)}
+.tw{display:flex;gap:6px}.tw input{flex:1}
+button,.btn{font:600 15px "IBM Plex Sans",sans-serif;min-height:46px;padding:0 16px;border-radius:8px;border:1px solid var(--nav);background:var(--nav);color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+button.o,.btn.o{background:var(--or);border-color:var(--or)}
+button.g{background:transparent;color:var(--ink);border-color:var(--line)}
+button.d{background:transparent;color:var(--bad);border-color:var(--bad)}
+button.d.on{background:var(--bad);color:#fff}
+.now{flex:none;padding:0 10px;font-size:13px}
+.item{border:1px solid var(--line);background:var(--soft);border-radius:10px;padding:12px;margin-top:12px}
+.item .grid{margin-top:0}
+.ih{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-weight:600}
+.pill{font-size:13px;padding:2px 10px;border-radius:12px;background:var(--tlbg);color:var(--tl);white-space:nowrap}
+.empty{color:var(--mut);font-size:14px;margin:12px 0 0}
+.fig{position:relative;height:250px;margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px;margin-top:14px}
+.k{background:var(--soft);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:12px}
+.k span{display:block;font-size:13px;color:var(--mut)}
+.k strong{font:700 clamp(24px,6vw,34px)/1.1 "IBM Plex Sans Condensed",sans-serif;white-space:nowrap}
+.k.ok{background:var(--okbg);border-left-color:var(--ok)}.k.bad{background:var(--badbg);border-left-color:var(--bad)}.k.warn{background:var(--warnbg);border-left-color:var(--warn)}
+.ph{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px;margin-top:12px}
+.ph figure{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--soft)}
+.ph img{display:block;width:100%;height:180px;object-fit:cover;cursor:zoom-in;background:#000}
+.ph figcaption{padding:10px;display:grid;gap:8px}
+.ph small{color:var(--mut)}
+.up{position:relative;overflow:hidden}.up input{position:absolute;inset:0;opacity:0;cursor:pointer;min-height:0}
+.note{font-size:14px;color:var(--mut);margin:10px 0 0}
+pre{white-space:pre-wrap;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:14px;margin:12px 0 0}
+.lb{position:fixed;inset:0;background:rgba(10,14,25,.92);display:none;place-items:center;z-index:20;padding:16px}
+.lb.on{display:grid}.lb img{max-width:100%;max-height:82vh;border-radius:6px}.lb p{color:#fff;text-align:center;margin:10px 0}
+.logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:12px}
+.logos>div{border:1px dashed var(--line);border-radius:10px;padding:12px;display:grid;gap:8px;justify-items:start}
+.logos img{max-height:50px;max-width:100%}
+.back{display:inline-block;font-size:14px;color:var(--mut);text-decoration:none;margin-bottom:10px}.back:hover{color:var(--or)}
+@media print{.top,.back,.bar,.lb,button,.up,#foto,.now,summary::after{display:none!important}details{border:0;break-inside:auto}details>summary{padding:10px 0;border-bottom:2px solid #1c233e}.body{border:0;padding:0 0 10px}.item,.k,.ph figure{break-inside:avoid}input,select,textarea{border:0;border-bottom:1px solid #ccc;border-radius:0;background:none;padding:2px 0;min-height:0;appearance:none;background-image:none}#exp,#cfg{display:none}body{font-size:12px}footer{background:none;color:#000;border-top:2px solid #1c233e}footer strong,footer b{color:#000}}
+footer{background:var(--nav);color:#d8dcea;margin-top:28px;padding:18px max(4vw,14px)}
+footer .tin{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:14px}
+footer strong{color:#fff}footer b{color:var(--or2)}
+@media (prefers-reduced-motion:no-preference){.flash{animation:f 1s}@keyframes f{from{background:var(--tlbg)}}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <a id="back" class="back" href="index.html#aplicaciones" hidden>← Elguezar SpA · Aplicaciones</a>
+  <div class="brand" id="brand"></div>
+  <h1>Prueba de respaldo <em>UPS</em> por desenergización de sala</h1>
+  <p>Protocolo de terreno. Se guarda solo mientras escribes. Lo que quede vacío se informa como pendiente de confirmación.</p>
+  <div class="bar" title="Avance del registro"><i id="prog"></i></div>
+</header>
+<div class="top">
+  <div class="tin">
+    <div class="row">
+      <select id="sel" aria-label="Prueba activa"></select>
+      <button id="nueva" class="o">Nueva prueba</button>
+      <span id="st" class="st">Cargando…</span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </div>
+</div>
+<main id="secs"></main>
+<div class="lb" id="lb" role="dialog" aria-label="Foto ampliada"><div><img id="lbi" alt=""><p id="lbt"></p><div class="row" style="justify-content:center"><button id="lbc" class="o">Cerrar</button></div></div></div>
+<datalist id="dl_area"></datalist><datalist id="dl_sala"></datalist><datalist id="dl_insp"></datalist><datalist id="dl_marca"></datalist>
+<footer><div class="tin"><span><strong>Alejandro Elgueta Zarhi</strong> · Ingeniero Eléctrico e Ingeniero Civil Industrial · Instalador SEC Clase A</span><span><b>Elguezar SpA</b></span></div></footer>
+<script>
+{
+const SN=['','Sí','No','No verificado'];
+const S=[
+ {id:'ident',t:'Identificación',f:[['area','Área','list'],['sala','Sala eléctrica','list'],['tag','TAG UPS','text'],['marca','Marca UPS','list'],['modelo','Modelo','text'],['serie','N° de serie','text'],['config','Configuración','sel',['','Monofásica','Trifásica entrada / monofásica salida','Trifásica']],['topo','Topología','sel',['','Online doble conversión','Línea interactiva','Standby (offline)','No verificado']],['kva','Potencia nominal','num','kVA'],['kw','Potencia activa','num','kW'],['tablero','Tablero o barra que alimenta','text'],['tipo','Tipo de prueba','sel',['','Desenergización total de la sala','Apertura del alimentador de la UPS','Apertura del interruptor de entrada UPS','Otro']],['fecha','Fecha','date'],['permiso','N° permiso de trabajo','text'],['insp','Inspector','list'],['partic','Participantes y empresa','area']]},
+ {id:'bat',t:'Baterías',f:[['btipo','Tipo','sel',['','VRLA plomo-ácido (AGM)','VRLA plomo-ácido (gel)','Plomo-ácido ventilada','Ni-Cd','Ion-litio','Otro']],['bubic','Ubicación','sel',['','Interna en gabinete UPS','Gabinete externo','Rack','Sala de baterías']],['bcant','Cantidad de bloques o celdas','num'],['bstr','Strings en paralelo','num'],['bvnom','Tensión nominal del banco','num','Vdc'],['bah','Capacidad','num','Ah'],['baut','Autonomía nominal','num','min'],['bfecha','Fecha fabricación o instalación','text'],['bvis','Inspección visual','sel',['','Sin observaciones','Hinchamiento','Fuga de electrolito','Corrosión en bornes','Terminales sueltos','Temperatura anormal','No inspeccionado']],['bvobs','Detalle inspección visual','area']]},
+ {id:'pre',t:'Antes del corte',f:[['phora','Hora del registro','time'],['pmodo','Modo de operación','sel',['','Normal (online)','Bypass estático','Bypass de mantenimiento','Eco','Batería']],['pbyp','Bypass disponible','sel',SN],['pvin','Tensión de entrada','num','V'],['piin','Corriente de entrada','num','A'],['phz','Frecuencia de entrada','num','Hz'],['pvout','Tensión de salida','num','V'],['piout','Corriente de salida','num','A'],['pcarga','Carga UPS','num','%'],['pvbat','Tensión de baterías','num','Vdc'],['pcbat','Estado de carga baterías','num','%'],['paut','Autonomía indicada en display','num','min'],['ptemp','Temperatura sala o baterías','num','°C'],['palsel','Alarmas activas','sel',['','Sin alarmas','Con alarmas (detallar)','No verificado']],['palarm','Detalle de alarmas','area']]},
+ {id:'corte',t:'Durante el corte',f:[['chora','Hora de corte','time'],['cmed','Cómo se ejecutó el corte','sel',['','Apertura interruptor aguas arriba','Apertura interruptor de entrada UPS','Desenergización total de la sala','Otro']],['ctransf','Transferencia a baterías sin interrupción','sel',SN],['cmodo','Modo indicado en display','sel',['','Batería','Bypass','Falla / apagada','No verificado']],['cvout','Tensión de salida en baterías','num','V'],['ccarga','Carga UPS en baterías','num','%'],['calsel','Alarmas durante el corte','sel',['','Solo alarma de falla de red (esperada)','Otras alarmas (detallar)','Sin alarmas','No verificado']],['calarm','Detalle de alarmas','area'],['cobs','Observaciones de la transferencia','area']]},
+ {id:'lect',t:'Lecturas de descarga',tb:'lect',n:'Lectura',c:[['hora','Hora','time'],['vbat','Tensión baterías','num','Vdc'],['ibat','Corriente baterías','num','A'],['carga','Carga UPS','num','%'],['aut','Autonomía indicada','num','min'],['alarma','Alarma','sel',['','Sin alarma nueva','Batería baja','Fin de autonomía','Otra']],['obs','Observación','text']]},
+ {id:'cargas',t:'Cargas respaldadas',tb:'cargas',n:'Carga',c:[['equipo','Equipo','text'],['tag','TAG','text'],['tipo','Tipo','sel',['','PLC / RIO','HMI / estación','Switch / comunicaciones','DCS','Instrumentación','Iluminación de emergencia','Protecciones / relés','Otro']],['comp','Comportamiento','sel',['','Operó normal','Se cayó','Se reinició','Perdió comunicación','No verificado']],['obs','Observación','text']]},
+ {id:'ret',t:'Retorno de energía',f:[['rhora','Hora de retorno','time'],['rmotivo','Motivo de término','sel',['','Fin programado de la prueba','Alarma de batería baja','Apagado de la UPS por fin de autonomía','Otro']],['rretr','Retransferencia a normal','sel',['','Correcta','Con falla','No verificado']],['rmodo','Modo final','sel',['','Normal (online)','Bypass','Falla','No verificado']],['rbyp','Estado del bypass','sel',['','Disponible','Activo','Con falla','No verificado']],['rvbat','Tensión baterías al cierre','num','Vdc'],['rcbat','Carga baterías al cierre','num','%'],['rtrec','Tiempo de recarga informado','text'],['ralsel','Alarmas después del retorno','sel',['','Sin alarmas','Con alarmas (detallar)','No verificado']],['ralarm','Detalle de alarmas','area']]},
+ {id:'hall',t:'Desviaciones y hallazgos',tb:'hall',n:'Hallazgo',c:[['cat','Categoría','sel',['','Seguridad','Calidad','Operacional','Documental']],['prio','Prioridad','sel',['','Alta','Media','Baja']],['estado','Estado','sel',['','Abierto','Cerrado','Pendiente de confirmación']],['ubic','Dónde (equipo, TAG)','text'],['hall','Qué se encontró','area'],['evid','Evidencia','text'],['impacto','Por qué importa','text'],['accion','Acción requerida','area'],['resp','Responsable','text'],['cierre','Evidencia de cierre','text']]},
+ {id:'fotos',t:'Fotos',ph:1},
+ {id:'res',t:'Resultado',rs:1,f:[['concl','Conclusión','sel',['','Cumple','Cumple con observaciones','No cumple','Pendiente de confirmación']],['comen','Comentarios','area']]},
+ {id:'exp',t:'Exportar y compartir',ex:1},
+ {id:'cfg',t:'Logos del encabezado',cf:1}
+];
+const PCAT=['Placa UPS','Placa baterías','Display antes del corte','Display durante el corte','Display al retorno','Banco de baterías','Tablero / interruptor','Cargas respaldadas','Alarmas','Hallazgo','Otro'];
+const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+const PRESET={area:inFrame?['PV4 Muelle','Planta RO 0761']:[],sala:inFrame?['Sala Eléctrica 0621']:[],marca:['ABB','APC','Eaton','Emerson / Vertiv','Gamatronic','Legrand','Riello','Schneider Electric','Siemens','Socomec'],insp:['Alejandro Elgueta Zarhi']};
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowHM=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const toM=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||'');return m?+m[1]*60+ +m[2]:null};
+const dif=(a,b)=>{a=toM(a);b=toM(b);if(a==null||b==null)return null;let d=b-a;if(d<0)d+=1440;return d};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const blank=()=>({id:uid(),created:Date.now(),updated:0,f:{fecha:new Date().toISOString().slice(0,10)},lect:[],cargas:[],hall:[],fotos:[]});
+let db=null,assets=null,dl=null,recs={},cur=blank(),dirty=false,saving=false,timer=null,delArm=false,logos={},openS=new Set(['ident']);
+const LS='upsPruebas',LSL='upsLogos';
+const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return {}}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+const lsPut=()=>{const o=lsGet(LS);o[cur.id]=cur;if(!lsSet(LS,o)){const c=clone(cur);c.fotos=c.fotos.filter(p=>!p.data);o[cur.id]=c;if(!lsSet(LS,o))st('Memoria del navegador llena: exporta y elimina pruebas antiguas','err')}};
+const st=(t,c)=>{const e=$('#st');e.textContent=t;e.className='st '+(c||'')};
+const IDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,ko)=>{try{const r=indexedDB.open('upsFotos',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)}catch(e){ko(e)}}));
+ const tx=(m,fn)=>open().then(d=>new Promise((ok,ko)=>{const t=d.transaction('f',m),r=fn(t.objectStore('f'));t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>ko(t.error)}));
+ return {put:(k,v)=>tx('readwrite',s=>s.put(v,k)),get:k=>tx('readonly',s=>s.get(k)),del:k=>tx('readwrite',s=>s.delete(k))}})();
+const URLS={};
+const src=p=>p.data||(p.lid?(URLS[p.lid]||''):(p.url||('/_blob/'+p.id)));
+async function hydrate(){for(const im of document.querySelectorAll('img[data-lid]')){const k=im.dataset.lid;if(!URLS[k]){try{const b=await IDB.get(k);if(b)URLS[k]=URL.createObjectURL(b)}catch(e){}}if(URLS[k])im.src=URLS[k];else im.alt='Foto no disponible en este equipo'}}
+
+function field([k,l,t,x],val,pre){
+ const id=pre+k,u=(t==='num'&&x)?` <span class="u">(${x})</span>`:'',fl=val?' filled':'';
+ let inp;
+ if(t==='sel')inp=`<select id="${id}" data-k="${k}" class="${fl}">${x.map(o=>`<option${o===val?' selected':''} value="${esc(o)}">${o||'Seleccionar…'}</option>`).join('')}${val&&!x.includes(val)?`<option selected value="${esc(val)}">${esc(val)}</option>`:''}</select>`;
+ else if(t==='area')inp=`<textarea id="${id}" data-k="${k}" class="${fl}">${esc(val)}</textarea>`;
+ else if(t==='time')inp=`<div class="tw"><input type="time" id="${id}" data-k="${k}" value="${esc(val)}" class="${fl}"><button type="button" class="g now" data-now="${id}">Ahora</button></div>`;
+ else if(t==='list')inp=`<input id="${id}" data-k="${k}" list="dl_${k}" autocomplete="off" value="${esc(val)}" class="${fl}" placeholder="Elegir o escribir">`;
+ else inp=`<input id="${id}" data-k="${k}" type="${t==='num'?'number':t}"${t==='num'?' inputmode="decimal" step="any"':''} value="${esc(val)}" class="${fl}">`;
+ return `<div class="${t==='area'?'full':''}"><label for="${id}">${l}${u}</label>${inp}</div>`;
+}
+function cnt(s){
+ if(s.f)return [s.f.filter(f=>cur.f[f[0]]).length,s.f.length];
+ if(s.tb)return [cur[s.tb].length,null];
+ if(s.ph)return [cur.fotos.length,null];
+ return null;
+}
+function cntTxt(s){const c=cnt(s);if(!c)return '';return c[1]==null?`${c[0]} registro${c[0]===1?'':'s'}`:`${c[0]} de ${c[1]}`}
+function dot(s){const c=cnt(s);if(!c)return '';const [a,b]=c;return b==null?(a?'f':''):(a===b?'f':a?'p':'')}
+function sec(s,i){
+ let h=`<details id="${s.id}"${openS.has(s.id)?' open':''}><summary><span class="n">${i+1}</span><h2>${s.t}</h2><span class="c" data-c="${s.id}">${cntTxt(s)}</span></summary><div class="body">`;
+ if(s.rs)h+=`<div class="res" id="kpi"></div>`;
+ if(s.f)h+=`<div class="grid">${s.f.map(f=>field(f,cur.f[f[0]],'f_')).join('')}</div>`;
+ if(s.tb){
+  const rows=cur[s.tb];
+  h+=rows.length?rows.map((r,j)=>`<div class="item" data-tb="${s.tb}" data-i="${j}"><div class="ih"><span>${s.n} ${j+1}</span>${s.tb==='lect'?`<span class="pill" data-t="${j}"></span>`:''}<button type="button" class="d" data-rm="${s.tb}" data-i="${j}">Quitar</button></div><div class="grid">${s.c.map(c=>field(c,r[c[0]],`${s.tb}${j}_`)).join('')}</div></div>`).join(''):`<p class="empty">Sin registros.</p>`;
+  h+=`<div class="row" style="margin-top:12px"><button type="button" class="o" data-add="${s.tb}">Agregar ${s.n.toLowerCase()}</button></div>`;
+  if(s.tb==='lect')h+=`<div class="fig"><svg id="chart" role="img" aria-label="Tensión de baterías versus minutos desde el corte"></svg></div>`;
+ }
+ if(s.ph){
+  h+=`<div class="row" style="margin-top:14px"><span class="btn o up">Agregar fotos<input type="file" id="foto" accept="image/*" multiple aria-label="Agregar fotos"></span></div>`;
+  h+=assets?'':`<p class="note">Las fotos quedan guardadas en este equipo. Para respaldarlas, consérvalas también en la galería del teléfono.</p>`;
+  h+=cur.fotos.length?`<div class="ph">${cur.fotos.map((p,j)=>`<figure><img src="${esc(src(p))}"${p.lid?` data-lid="${esc(p.lid)}"`:''} data-z="${j}" alt="${esc(p.cap||p.cat||'Foto '+(j+1))}" loading="lazy"><figcaption><small>Foto ${j+1}${p.hora?' · '+esc(p.hora):''}${p.id?'':(inFrame?' · solo en este equipo':'')}</small><select data-pcat="${j}" aria-label="Categoría foto ${j+1}">${['',...PCAT].map(o=>`<option${o===p.cat?' selected':''} value="${esc(o)}">${o||'Categoría…'}</option>`).join('')}</select><input data-cap="${j}" value="${esc(p.cap)}" placeholder="Descripción: qué muestra" aria-label="Descripción foto ${j+1}"><button type="button" class="d" data-rmf="${j}">Quitar foto</button></figcaption></figure>`).join('')}</div>`:`<p class="empty">Sin fotos. Desde el teléfono puedes tomarlas con la cámara.</p>`;
+ }
+ if(s.ex)h+=`<div class="row" style="margin-top:14px"><button id="csv" class="o"${dl||!inFrame?'':' hidden'}>Descargar CSV (Excel)</button><button id="json" class="g"${dl||!inFrame?'':' hidden'}>Descargar respaldo JSON</button>${inFrame?'':'<button id="prt" class="g">Imprimir o guardar PDF</button><span class="btn g up" style="color:var(--ink);background:transparent;border-color:var(--line)">Importar respaldo JSON<input type="file" id="imp" accept="application/json,.json" aria-label="Importar respaldo JSON"></span>'}<button id="cpw" class="g">Copiar resumen WhatsApp</button><button id="del" class="d">Eliminar esta prueba</button></div><p id="expmsg" class="note"></p><pre id="wa"></pre>`;
+ if(s.cf)h+=`<p class="note">${inFrame?'Sube una vez los logos de Sigma y de Minera Centinela; quedan en el encabezado de todas las pruebas.':'Sube una vez los logos de tu empresa y del mandante; quedan en el encabezado de todas las pruebas, guardados solo en este equipo.'}</p><div class="logos">${(inFrame?[['sigma','Logo Sigma'],['mcent','Logo Minera Centinela']]:[['sigma','Logo izquierdo'],['mcent','Logo derecho']]).map(([k,l])=>`<div><strong>${l}</strong>${logos[k]?`<img src="${esc(logos[k].data||('/_blob/'+logos[k].id))}" alt="${l}">`:'<span class="note" style="margin:0">Sin cargar</span>'}<div class="row"><span class="btn g up" style="color:var(--ink);background:transparent;border-color:var(--line)">${logos[k]?'Cambiar':'Subir'}<input type="file" accept="image/*" data-logo="${k}" aria-label="${l}"></span>${logos[k]?`<button class="d" data-rml="${k}">Quitar</button>`:''}</div></div>`).join('')}</div>`;
+ return h+'</div></details>';
+}
+function render(){
+ $('#secs').innerHTML=S.map(sec).join('');
+ nav();brand();lists();calc();bindChart();hydrate();
+}
+function nav(){$('#nav').innerHTML=S.map((s,i)=>`<a href="#${s.id}" data-go="${s.id}"><i class="${dot(s)}"></i>${i+1}. ${s.t}</a>`).join('')}
+function brand(){const b=$('#brand');b.innerHTML=['sigma','mcent'].map(k=>logos[k]?`<img src="${esc(logos[k].data||('/_blob/'+logos[k].id))}" alt="${k==='sigma'?'Sigma':'Minera Centinela'}">`:'<span></span>').join('')}
+function lists(){
+ const all=[...Object.values(recs),cur];
+ ['area','sala','marca','insp'].forEach(k=>{const v=new Set([...(PRESET[k]||[]),...all.map(r=>r.f&&r.f[k]).filter(Boolean)]);$('#dl_'+k).innerHTML=[...v].sort().map(o=>`<option value="${esc(o)}"></option>`).join('')});
+}
+function progress(){
+ const tot=S.filter(s=>s.f).reduce((a,s)=>a+s.f.length,0)+3,got=S.filter(s=>s.f).reduce((a,s)=>a+s.f.filter(f=>cur.f[f[0]]).length,0)+(cur.lect.length?1:0)+(cur.cargas.length?1:0)+(cur.fotos.length?1:0);
+ $('#prog').style.width=Math.round(got/tot*100)+'%';
+ S.forEach(s=>{const e=document.querySelector(`[data-c="${s.id}"]`);if(e)e.textContent=cntTxt(s)});nav();
+}
+function calc(){
+ const f=cur.f,cor=f.chora;
+ cur.lect.forEach((r,j)=>{const e=document.querySelector(`[data-t="${j}"]`);if(e){const d=dif(cor,r.hora);e.textContent=d==null?'t pendiente':`t = ${d} min`}});
+ const med=dif(cor,f.rhora),nom=+f.baut||null,pct=med!=null&&nom?Math.round(med/nom*100):null;
+ const vs=cur.lect.map(r=>+r.vbat).filter(v=>v>0);
+ const caid=cur.cargas.filter(c=>['Se cayó','Se reinició','Perdió comunicación'].includes(c.comp)).length;
+ const ab=cur.hall.filter(h=>h.estado!=='Cerrado').length;
+ const k=[
+  ['Tiempo en baterías',med==null?'—':med+' min',''],
+  ['Autonomía nominal',nom?nom+' min':'—',''],
+  ['Prueba vs nominal',pct==null?'—':pct+' %',''],
+  ['Tensión mínima registrada',vs.length?Math.min(...vs)+' Vdc':'—',''],
+  ['Transferencia sin interrupción',f.ctransf||'—',f.ctransf==='Sí'?'ok':f.ctransf==='No'?'bad':f.ctransf?'warn':''],
+  ['Retransferencia',f.rretr||'—',f.rretr==='Correcta'?'ok':f.rretr==='Con falla'?'bad':f.rretr?'warn':''],
+  ['Cargas afectadas',String(caid),caid?'bad':cur.cargas.length?'ok':''],
+  ['Hallazgos abiertos',String(ab),ab?'warn':''],
+  ['Conclusión',f.concl||'—',f.concl==='Cumple'?'ok':f.concl==='No cumple'?'bad':f.concl?'warn':'']
+ ];
+ const kp=$('#kpi');if(kp)kp.innerHTML=k.map(([a,b,c])=>`<div class="k ${c}"><span>${a}</span><strong>${esc(b)}</strong></div>`).join('');
+ draw();wa();progress();
+}
+function draw(){
+ const s=$('#chart');if(!s)return;const W=s.clientWidth,H=s.clientHeight;if(!W)return;
+ const p=cur.lect.map(r=>({t:dif(cur.f.chora,r.hora),v:+r.vbat})).filter(o=>o.t!=null&&o.v>0).sort((a,b)=>a.t-b.t);
+ if(!p.length){s.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--mut)" font-size="14">Ingresa hora de corte y lecturas para ver la curva</text>`;return}
+ const L=50,R=18,T=18,B=40,tm=Math.max(...p.map(o=>o.t),1),vmin=Math.min(...p.map(o=>o.v)),vmax=Math.max(...p.map(o=>o.v)),pad=(vmax-vmin)*0.12||5,v0=vmin-pad,v1=vmax+pad;
+ const x=t=>L+t/tm*(W-L-R),y=v=>T+(v1-v)/(v1-v0)*(H-T-B);
+ const tk=W<520?3:5;let g='';
+ for(let i=0;i<=tk;i++){const v=v0+(v1-v0)*i/tk,yy=y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${L-6}" y="${yy+4}" text-anchor="end" font-size="12" fill="var(--mut)">${v.toFixed(0)}</text>`}
+ for(let i=0;i<=tk;i++){const t=tm*i/tk;g+=`<text x="${x(t)}" y="${H-20}" text-anchor="middle" font-size="12" fill="var(--mut)">${Math.round(t)}</text>`}
+ g+=`<text x="${W-R}" y="${H-4}" text-anchor="end" font-size="12" fill="var(--mut)">minutos desde el corte</text><text x="6" y="12" font-size="12" fill="var(--mut)">Vdc</text>`;
+ g+=`<polyline fill="none" stroke="var(--or)" stroke-width="2.5" stroke-linejoin="round" points="${p.map(o=>x(o.t)+','+y(o.v)).join(' ')}"/>`+p.map(o=>`<circle cx="${x(o.t)}" cy="${y(o.v)}" r="4.5" fill="var(--bg)" stroke="var(--or)" stroke-width="2.5"/>`).join('');
+ s.innerHTML=g;
+}
+const chartRO=new ResizeObserver(()=>draw());
+function bindChart(){chartRO.disconnect();const s=$('#chart');if(s)chartRO.observe(s)}
+function wa(){
+ const f=cur.f,med=dif(f.chora,f.rhora),P='pendiente';
+ const caid=cur.cargas.filter(c=>['Se cayó','Se reinició','Perdió comunicación'].includes(c.comp)).map(c=>c.tag||c.equipo).filter(Boolean);
+ const ab=cur.hall.filter(h=>h.estado!=='Cerrado').length;
+ const t=[`${f.area||'Área '+P} / ${f.sala||'sala '+P} / UPS ${f.tag||'TAG '+P}`,
+ `Prueba de respaldo por desenergización: corte ${f.chora||P}, retorno ${f.rhora||P}, transferencia sin interrupción: ${f.ctransf||P}.`,
+ `Tiempo en baterías ${med==null?P:med+' min'} (nominal ${f.baut?f.baut+' min':P}). Cargas afectadas: ${caid.length?caid.join(', '):'ninguna registrada'}. Resultado: ${f.concl||P}.`,
+ `Pendientes: ${ab?ab+' hallazgo(s) abiertos':'sin hallazgos abiertos registrados'}.`].join('\n');
+ const e=$('#wa');if(e)e.textContent=t;return t;
+}
+function label(r){const f=r.f||{};return [f.area,f.sala,f.tag,f.fecha].filter(Boolean).join(' · ')||'Prueba sin identificar'}
+function fillSel(){
+ const all={...recs};all[cur.id]=cur;
+ const arr=Object.values(all).sort((a,b)=>(b.created||0)-(a.created||0));
+ $('#sel').innerHTML=arr.map(r=>`<option value="${esc(r.id)}"${r.id===cur.id?' selected':''}>${esc(label(r))}</option>`).join('');
+}
+function full(){render();fillSel()}
+function touch(){cur.updated=Date.now();dirty=true;st('Sin guardar…');lsPut();clearTimeout(timer);timer=setTimeout(save,900)}
+async function save(){
+ if(saving){clearTimeout(timer);timer=setTimeout(save,500);return}
+ if(!dirty)return;
+ saving=true;dirty=false;const data=clone(cur);data.fotos=data.fotos.filter(p=>p.id).map(({data:_,...p})=>p);
+ try{
+  if(db){await db.collection('pruebas').doc(cur.id).set(data);st('Guardado en la nube '+nowHM(),'ok')}
+  else st('Guardado en este equipo '+nowHM(),'ok');
+  recs[cur.id]=clone(cur);fillSel();
+ }catch(e){
+  dirty=true;st(e&&e.code==='quota_exceeded'?'Base de datos llena: exporta y elimina pruebas antiguas':'No se pudo guardar en la nube, reintentando (queda copia en este equipo)','err');
+  if(!e||e.code!=='invalid_argument')timer=setTimeout(save,4000);
+ }finally{saving=false}
+}
+function shrink(file,m,q){return new Promise((ok,ko)=>{const im=new Image();im.onload=()=>{const s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(im.src);c.toBlob(b=>b?ok({b,u:c.toDataURL('image/jpeg',q)}):ko(),'image/jpeg',q)};im.onerror=ko;im.src=URL.createObjectURL(file)})}
+async function saveLogos(){lsSet(LSL,logos);if(db)try{const o={};for(const k in logos)if(logos[k].id)o[k]={id:logos[k].id};await db.doc('config/logos').set(o)}catch(e){}}
+document.addEventListener('input',e=>{
+ const el=e.target,k=el.dataset.k;
+ if(el.dataset.cap!=null){cur.fotos[+el.dataset.cap].cap=el.value;touch();return}
+ if(!k)return;
+ const it=el.closest('.item');
+ if(it)cur[it.dataset.tb][+it.dataset.i][k]=el.value;else cur.f[k]=el.value;
+ el.classList.toggle('filled',!!el.value);
+ touch();calc();if(['area','sala','tag','fecha'].includes(k))fillSel();
+});
+document.addEventListener('change',async e=>{
+ const el=e.target;
+ if(el.dataset.pcat!=null){cur.fotos[+el.dataset.pcat].cat=el.value;touch();return}
+ if(el.id==='foto'){
+  const files=[...el.files];if(!files.length)return;st('Procesando '+files.length+' foto(s)…');let bad=0;
+  for(const fl of files){try{
+   if(assets){const {b}=await shrink(fl,1920,0.85);const r=await assets.upload(b);cur.fotos.push({id:r.id,url:r.url,cat:'',cap:'',hora:nowHM()})}
+   else{const {b,u}=await shrink(fl,1920,0.85);const lid=uid();try{await IDB.put(lid,b);cur.fotos.push({lid,cat:'',cap:'',hora:nowHM()})}catch(e){const s2=await shrink(fl,1024,0.7);cur.fotos.push({data:s2.u,cat:'',cap:'',hora:nowHM()})}}
+  }catch(err){bad++}}
+  openS.add('fotos');touch();full();if(bad)st(bad+' foto(s) no se pudieron subir','err');return
+ }
+ if(el.id==='imp'){const fl=el.files[0];if(!fl)return;try{const r=JSON.parse(await fl.text());if(!r||!r.id||!r.f)throw 0;clearTimeout(timer);await save();r.lect=r.lect||[];r.cargas=r.cargas||[];r.hall=r.hall||[];r.fotos=r.fotos||[];cur=r;recs[r.id]=clone(r);touch();full();msg('Respaldo importado.')}catch(e){msg('El archivo no es un respaldo válido de esta aplicación.')}return}
+ if(el.dataset.logo){const k=el.dataset.logo,fl=el.files[0];if(!fl)return;
+  try{if(assets){const {b}=await shrink(fl,600,0.92);const r=await assets.upload(b);logos[k]={id:r.id}}else{const {u}=await shrink(fl,400,0.9);logos[k]={data:u}}await saveLogos();render()}catch(err){st('No se pudo cargar el logo','err')}}
+});
+document.addEventListener('toggle',e=>{const d=e.target;if(d.tagName==='DETAILS'){d.open?openS.add(d.id):openS.delete(d.id);if(d.id==='lect'&&d.open)draw()}},true);
+document.addEventListener('click',async e=>{
+ const a=e.target.closest('[data-go]');if(a){const d=document.getElementById(a.dataset.go);if(d){d.open=true;openS.add(d.id)}return}
+ const z=e.target.closest('[data-z]');if(z){const p=cur.fotos[+z.dataset.z];$('#lbi').src=src(p);$('#lbi').alt=p.cap||'';$('#lbt').textContent=[p.cat,p.cap].filter(Boolean).join(' · ');$('#lb').classList.add('on');return}
+ const b=e.target.closest('button');if(!b)return;
+ if(b.id==='lbc'){$('#lb').classList.remove('on');return}
+ if(b.dataset.now){const i=document.getElementById(b.dataset.now);i.value=nowHM();i.dispatchEvent(new Event('input',{bubbles:true}));return}
+ if(b.dataset.add){const tb=b.dataset.add,r={};if(tb==='lect')r.hora=nowHM();if(tb==='hall')r.estado='Abierto';cur[tb].push(r);openS.add(tb);touch();full();const items=document.querySelectorAll(`[data-tb="${tb}"]`),last=items[items.length-1];if(last){last.classList.add('flash');last.scrollIntoView({block:'center'})}return}
+ if(b.dataset.rm){cur[b.dataset.rm].splice(+b.dataset.i,1);touch();full();return}
+ if(b.dataset.rmf){const p=cur.fotos.splice(+b.dataset.rmf,1)[0];if(assets&&p&&p.id)try{await assets.delete(p.id)}catch(err){}if(p&&p.lid)try{await IDB.del(p.lid)}catch(err){}touch();full();return}
+ if(b.dataset.rml){delete logos[b.dataset.rml];await saveLogos();render();return}
+ if(b.id==='nueva'){clearTimeout(timer);await save();cur=blank();openS=new Set(['ident']);resetDel();full();st('Prueba nueva: se guarda al escribir');scrollTo(0,0);return}
+ if(b.id==='cpw'){try{await navigator.clipboard.writeText(wa());msg('Resumen copiado.')}catch(err){msg('No se pudo copiar: mantén presionado el texto de abajo para copiarlo.')}return}
+ if(b.id==='prt'){const prev=new Set(openS);document.querySelectorAll('details').forEach(d=>d.open=true);addEventListener('afterprint',()=>{document.querySelectorAll('details').forEach(d=>d.open=prev.has(d.id))},{once:true});setTimeout(()=>{draw();print()},150);return}
+ if(b.id==='csv')return down('csv');
+ if(b.id==='json')return down('json');
+ if(b.id==='del'){
+  if(!delArm){delArm=true;b.classList.add('on');b.textContent='Confirmar: eliminar definitivamente';return}
+  clearTimeout(timer);dirty=false;const id=cur.id;
+  try{if(db)await db.collection('pruebas').doc(id).delete();delete recs[id];const o=lsGet(LS);delete o[id];lsSet(LS,o);
+   const rest=Object.values(recs).sort((a,b)=>(b.created||0)-(a.created||0));cur=rest[0]?clone(rest[0]):blank();resetDel();full();st('Prueba eliminada','ok')}
+  catch(err){st('No se pudo eliminar','err')}
+ }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#lb').classList.remove('on')});
+function resetDel(){delArm=false;const b=$('#del');if(b){b.classList.remove('on');b.textContent='Eliminar esta prueba'}}
+function msg(t){const m=$('#expmsg');if(m)m.textContent=t}
+$('#sel').addEventListener('change',async e=>{clearTimeout(timer);await save();const r=recs[e.target.value];if(r){cur=clone(r);resetDel();full()}});
+function csv(){
+ const q=v=>{v=String(v??'');return /[;"\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+ const L=[['Prueba de respaldo UPS por desenergización de sala'],['Sección','Campo','Valor','Unidad']];
+ S.forEach(s=>{(s.f||[]).forEach(([k,l,t,x])=>L.push([s.t,l,cur.f[k]||'pendiente de confirmación',t==='num'?(x||''):'']))});
+ const md=dif(cur.f.chora,cur.f.rhora);L.push(['Resultado','Tiempo en baterías (calculado: retorno − corte)',md==null?'pendiente de confirmación':md,'min']);
+ S.filter(s=>s.tb).forEach(s=>{L.push([]);L.push([s.t]);L.push(['N°',...(s.tb==='lect'?['t desde corte (min)']:[]),...s.c.map(c=>c[1]+(c[2]==='num'&&c[3]?' ('+c[3]+')':''))]);cur[s.tb].forEach((r,j)=>L.push([j+1,...(s.tb==='lect'?[dif(cur.f.chora,r.hora)??'']:[]),...s.c.map(c=>r[c[0]]||'')]))});
+ L.push([]);L.push(['Fotos']);L.push(['N°','Hora','Categoría','Descripción']);cur.fotos.forEach((p,j)=>L.push([j+1,p.hora||'',p.cat||'',p.cap||'']));
+ L.push([]);L.push(['Elaborado por','Alejandro Elgueta Zarhi · Elguezar SpA']);
+ return '﻿'+L.map(r=>r.map(q).join(';')).join('\r\n');
+}
+async function down(t){
+ const f=cur.f,n=('Prueba_UPS_'+[f.sala,f.tag,f.fecha].filter(Boolean).join('_')).replace(/[^\w.-]+/g,'_');
+ const data=t==='csv'?csv():JSON.stringify(cur,null,2);
+ if(!dl){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([data],{type:t==='csv'?'text/csv;charset=utf-8':'application/json'}));a.href=u;a.download=n+'.'+t;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);msg('Archivo descargado.'+(t==='json'?' Las fotos no van en el respaldo: quedan en este equipo.':''));return}
+ try{await dl.save({filename:n+'.'+t,data});msg('Archivo entregado.')}
+ catch(e){msg(e&&e.code==='declined'?'Descarga cancelada.':e&&e.code==='host_unavailable'?'Esta app no puede guardar archivos: abre la página en un navegador.':'No se pudo descargar.')}
+}
+function load(o){recs={};Object.values(o).forEach(r=>{if(r&&r.id)recs[r.id]=r})}
+logos=lsGet(LSL);
+if(!inFrame)$('#back').hidden=false;
+full();
+(async()=>{
+ const local=lsGet(LS);
+ const use=n=>{try{return window.claude?Promise.resolve(window.claude.use(n)).catch(()=>null):Promise.resolve(null)}catch(e){return Promise.resolve(null)}};
+ const [d,a,w]=await Promise.all([use('db'),use('assets'),use('downloads')]);
+ db=d;assets=a;dl=w;
+ const newest=()=>Object.values(recs).sort((x,y)=>(y.created||0)-(x.created||0))[0];
+ if(!db){load(local);const r=newest();if(r&&!dirty)cur=clone(r);full();st(Object.keys(recs).length?'Datos de este equipo':'Listo: se guarda en este equipo');return}
+ try{const lg=await db.doc('config/logos').get();if(lg.exists){const o=lg.data()||{};for(const k in o)if(o[k]&&o[k].id)logos[k]={id:String(o[k].id)};lsSet(LSL,logos);brand()}}catch(e){}
+ let first=true;const to=setTimeout(()=>st('La nube no responde aún; se guarda en este equipo','err'),10000);
+ db.collection('pruebas').onSnapshot(snap=>{
+  if(!snap.metadata.fromCache)clearTimeout(to);
+  const o={};snap.docs.forEach(x=>{const v=x.data();if(v)o[x.id]=clone(v)});
+  Object.values(local).forEach(r=>{if(r&&r.id&&o[r.id]&&(o[r.id].updated||0)>=(r.updated||0)){const lf=(r.fotos||[]).filter(p=>!p.id);if(lf.length)o[r.id].fotos=[...(o[r.id].fotos||[]),...lf]}});
+  const push=[];Object.values(local).forEach(r=>{if(r&&r.id&&r.updated&&(!o[r.id]||(o[r.id].updated||0)<r.updated)){o[r.id]=r;push.push(r.id)}});
+  load(o);
+  if(first){first=false;if(!dirty){const r=newest();if(r)cur=clone(r)}full();if(!snap.metadata.fromCache)st('Conectado a la nube','ok');(async()=>{for(const id of push){if(id===cur.id){dirty=true;await save()}else try{const c=clone(recs[id]);c.fotos=(c.fotos||[]).filter(p=>p.id);await db.collection('pruebas').doc(id).set(c)}catch(e){}}})();return}
+  const r=recs[cur.id];if(r&&!dirty&&!saving&&(r.updated||0)>(cur.updated||0)){cur=clone(r);full()}else fillSel();
+ },err=>{clearTimeout(to);st('Sin acceso a la nube: se guarda en este equipo','err');db=null});
+})();
+}
+</script>
+</body>
+</html>
